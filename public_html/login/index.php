@@ -1,17 +1,17 @@
 <?php
 
-$App = $this;
-$App->RedirectAuthenticated("home.php");
+include dirname(__DIR__,2) . "/App.php";
 
-$App->Attributes["title"] = "Login";
-$App->Attributes["menu"] = [];
+$App = new App();
+
+//$App->RedirectAuthenticated("home.php");
+
+$App->title = "Login";
 
 $App->RenderHtml('open.php');
 $App->RenderHtml('header.php');
 
 ?>
-
-
 
 <main id="main-content" class="">
     <section class="p-strip">
@@ -32,6 +32,7 @@ $App->RenderHtml('header.php');
                         <input class="input login__input" autocapitalize="off" autocorrect="off" type="text" placeholder="Email" name="email" />
                         <label class="login__title">Password:</label>
                         <input class="input login__input" autocapitalize="off" autocorrect="off" type="password" placeholder="Password" name="password" />
+                        <input type="hidden" name="method" value="Authentication.login">
                         <button id="login__button" class="button login__button" type="submit"><span class="fa fa-lock footer__icon login-button__icon"></span> Login</button>
                     </form>
                 </div>
@@ -67,8 +68,7 @@ $App->RenderHtml('header.php');
             $xhr.addEventListener('load', function(event)
             {
                 const response = JSON.parse(event.target.responseText);
-
-                if (response.error === 'true')
+                if (response.ok === 'false' || response.warning === 'login failed')
                 {
                     let notification = document.getElementById('notification');
                     if (notification) {
@@ -76,21 +76,24 @@ $App->RenderHtml('header.php');
                     }
                 }
             });
-            $xhr.onreadystatechange = function() {
+            $xhr.addEventListener('readystatechange', function(event)
+            {
                 if ($xhr.readyState == XMLHttpRequest.DONE)
                 {
-                    if (this.status == 201) {
-                        window.location = site + 'home';
-                    } else {
-                        console.log('Login failed. Response code: '+this.status);
+                    const response = JSON.parse(event.target.responseText);
+                    if (response.ok === 'false' || response.hasOwnProperty('warning') || response.hasOwnProperty('error')) {
+                        return;
+                    }
+                    if (response.ok === 'true') {
+                        window.location = site + 'dashboard';
                     }
                 }
-            }
+            });
             $xhr.addEventListener('error', function(event)
             {
                 console.log('An error occured while logging in.');
             });
-            $xhr.open("POST", api + 'login');
+            $xhr.open("POST", api);
             // Specifying a header here could cause the POST data to be send
             // incorrectly, don't set it explicitly and let the broswer generate
             // the correct one automatically

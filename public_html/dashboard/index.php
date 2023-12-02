@@ -1,15 +1,16 @@
 <?php
-$App = $this;
+
+include dirname(__DIR__,2) . "/App.php";
+
+$App = new App();
+
 $App->IsAuthenticated();
 
-$App->Attributes["title"] = "Dashboard";
-$App->Attributes["menu"] = [
-    "Workouts" => "/workouts",
-    "Exercises" => "/exercises"
-];
+$App->title = "Dashboard";
 
 $App->RenderHtml('open.php');
 $App->RenderHtml('header.php');
+
 ?>
 
 <div id="main-content" class="l-site">
